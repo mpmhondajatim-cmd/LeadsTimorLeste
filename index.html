@@ -33,7 +33,7 @@
   <form id="leadForm">
     <div class="mb-3">
       <label class="form-label">Naran Kompletu <span class="asterisk">*</span></label>
-      <input type="text" name="nama" id="nama" class="form-control" placeholder="Hakerek naran tuir KTP" required oninput="validateForm()">
+      <input type="text" name="nama" id="nama" class="form-control" placeholder="Naran tuir ID ofisiál" required oninput="validateForm()">
     </div>
 
     <div class="mb-3">
@@ -81,6 +81,11 @@
     </div>
 
     <div class="mb-3">
+      <label class="form-label">Naran Sales <span class="asterisk">*</span></label>
+      <input type="text" name="namaSales" id="namaSales" class="form-control" placeholder="Hakerek naran sales" required oninput="validateForm()">
+    </div>
+
+    <div class="mb-3">
       <label class="form-label">Eventu / Fonte <span class="asterisk">*</span></label>
       <select name="event" id="event" class="form-select select2" required onchange="validateForm()">
         <option value="">Hili...</option>
@@ -111,7 +116,7 @@
     $('.select2').select2({ width: '100%' });
     loadOptions('getMunicipios', 'municipio');
     loadOptions('getMotorOptions', 'motor');
-    loadOptions('getDealers', 'dealer'); // Ambil list dealer
+    loadOptions('getDealers', 'dealer');
     loadOptions('getEvents', 'event');
   });
 
@@ -143,8 +148,12 @@
   }
 
   function validateForm() {
-    const fields = ['nama', 'wa', 'municipio', 'posto', 'motor', 'estimasi', 'dealer', 'event'];
-    const allFilled = fields.every(id => $(`#${id}`).val() && $(`#${id}`).val().trim() !== "");
+    // Tambahkan namaSales ke dalam pengecekan validasi
+    const fields = ['nama', 'wa', 'municipio', 'posto', 'motor', 'estimasi', 'dealer', 'namaSales', 'event'];
+    const allFilled = fields.every(id => {
+      const val = $(`#${id}`).val();
+      return val && val.trim() !== "";
+    });
     const agreed = $('#agree').is(':checked');
     $('#submitBtn').prop('disabled', !(allFilled && agreed));
   }
