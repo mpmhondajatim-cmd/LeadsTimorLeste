@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tet">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formuláriu Sosa Motór</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root { --honda-red: #E4002B; --honda-dark: #333333; }
+    body { background-color: #f4f4f4; padding: 20px; font-family: 'Segoe UI', sans-serif; }
+    .form-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 650px; margin: auto; border-top: 6px solid var(--honda-red); }
+    h3 { color: var(--honda-red); font-weight: 800; text-transform: uppercase; }
+    .btn-honda { background-color: var(--honda-red); color: white; font-weight: bold; border: none; }
+    .btn-honda:hover { background-color: #b30022; color: white; }
+    .asterisk { color: var(--honda-red); }
+    .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); display:none; justify-content:center; align-items:center; z-index:9999; }
+  </style>
+</head>
+<body>
+
+<div id="loading" class="loading-overlay"><div class="spinner-border text-danger"></div></div>
+
+<div class="text-center mb-3">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Honda_Logo.svg/1024px-Honda_Logo.svg.png" style="width: 60px;">
+</div>
+
+<div class="form-container">
+  <h3 class="text-center mb-4">Pemesanan Motór</h3>
+  <form id="leadForm">
+    <div class="mb-3">
+      <label>Naran Kompletu <span class="asterisk">*</span></label>
+      <input type="text" id="nama" name="nama" class="form-control" placeholder="Hakerek naran tuir KTP" required oninput="validateForm()">
+    </div>
+    <div class="mb-3">
+      <label>Númeru WhatsApp <span class="asterisk">*</span></label>
+      <input type="tel" id="wa" name="wa" class="form-control" placeholder="Ezemplu: 0812xxxxxxxx" required oninput="validateForm()">
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label>Município <span class="asterisk">*</span></label>
+        <select id="municipio" name="municipio" class="form-select" required onchange="updatePosto()">
+          <option value="">Hili...</option>
+        </select>
+      </div>
+      <div class="col-md-6 mb-3">
+        <label>Posto Administrativo <span class="asterisk">*</span></label>
+        <select id="posto" name="posto" class="form-select" disabled required onchange="validateForm()">
+          <option value="">Hili...</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label>Tipu Motór <span class="asterisk">*</span></label>
+      <select id="motor" name="motor" class="form-select" required onchange="validateForm()">
+        <option value="">Hein uitoan...</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label>Estimasaun Sosa <span class="asterisk">*</span></label>
+      <select id="estimasi" name="estimasi" class="form-select" required onchange="validateForm()">
+        <option value="">Hili...</option>
+        <option value="1-2 Minggu">Semana 1-2</option>
+        <option value="3-4 Minggu">Semana 3-4</option>
+        <option value="Diatas 1 Bulan">Liu fulan 1</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label>Eventu <span class="asterisk">*</span></label>
+      <select id="event" name="event" class="form-select" required onchange="validateForm()">
+        <option value="">Hein uitoan...</option>
+      </select>
+    </div>
+
+    <label><h6><b>Polítika Privasidade</b></h6></label>
+    <div class="privacy-box p-2 border rounded bg-light small">
+      Ho hanehan formuláriu ne'e, Ita fó kbiit ba ami-nia ekipa atu kontaktu Ita liuhosi WhatsApp ka telefone kona-ba informasaun produtu no promozaun[cite: 43]. Ami kompromete atu proteje Ita-nia dadus pesoál[cite: 43].
+    </div>
+    <br>
+    <div class="form-check mb-4">
+      <input class="form-check-input" type="checkbox" id="agree" required onchange="validateForm()">
+      <label class="form-check-label" for="agree"><small><b>Ha'u konkorda ho polítika dadus</b></small><span class="asterisk">*</span></label>
+    </div>
+
+    <button type="submit" id="submitBtn" class="btn btn-honda w-100 py-2 fw-bold" disabled>HARUKA FORMULÁRIU</button>
+  </form>
+</div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMxvwdf9aX0KRtJkBqepnL4b5J4tnLhwds5AvrI6bWgWnumcG8v_RJYlgYBVZ9O9qouA/exec"; // GANTI DENGAN URL BARU ANDA
+  const loader = document.getElementById('loading');
+
+  window.onload = () => {
+    fetchData('getMunicipios', {}, 'municipio');
+    fetchData('getMotorOptions', {}, 'motor');
+    fetchData('getEvents', {}, 'event');
+  };
+
+  async function fetchData(action, params, elementId) {
+    const query = new URLSearchParams({ action, ...params }).toString();
+    try {
+      const response = await fetch(`${SCRIPT_URL}?${query}`);
+      const data = await response.json();
+      const select = document.getElementById(elementId);
+      select.innerHTML = '<option value="">Hili...</option>';
+      data.forEach(item => select.add(new Option(item, item)));
+    } catch (e) { console.error(e); }
+  }
+
+  function updatePosto() {
+    const muni = document.getElementById('municipio').value;
+    const posto = document.getElementById('posto');
+    posto.disabled = !muni;
+    if(muni) fetchData('getPostos', { municipio: muni }, 'posto');
+    validateForm();
+  }
+
+  function validateForm() {
+    const fields = ['nama', 'wa', 'municipio', 'posto', 'motor', 'estimasi', 'event'];
+    const allFilled = fields.every(id => document.getElementById(id).value.trim() !== "");
+    const agreed = document.getElementById('agree').checked;
+    document.getElementById('submitBtn').disabled = !(allFilled && agreed);
+  }
+
+  document.getElementById('leadForm').onsubmit = async function(e) {
+    e.preventDefault();
+    loader.style.display = 'flex';
+    const formData = Object.fromEntries(new FormData(this));
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(formData)
+      });
+      alert("Dadus haruka ona!");
+      this.reset();
+      document.getElementById('posto').disabled = true;
+      validateForm();
+    } catch (e) {
+      alert("Error haruka dadus.");
+    } finally {
+      loader.style.display = 'none';
+    }
+  };
+</script>
+</body>
+</html>
