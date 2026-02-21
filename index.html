@@ -92,6 +92,13 @@
       </select>
     </div>
 
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" name="isDeal" id="isDeal">
+      <label class="form-check-label fw-bold" for="isDeal">
+        Deal
+      </label>
+    </div>
+    
     <div class="privacy-box mb-3">
       <strong>Polítika Privasidade:</strong><br>
       Ho hanehan formuláriu ne'e, Ita fó kbiit ba ami-nia ekipa atu kontaktu Ita liuhosi WhatsApp ka telefone kona-ba informasaun produtu no promozaun. Ami kompromete atu proteje Ita-nia dadus pesoál ho seguru.
@@ -161,17 +168,20 @@
   $('#leadForm').on('submit', async function(e) {
     e.preventDefault();
     $('#loader').css('display', 'flex');
+    
     const formData = Object.fromEntries(new FormData(this));
+    // Logika tambahan untuk menangkap status checkbox Deal (TRUE/FALSE)
+    formData.isDeal = $('#isDeal').is(':checked') ? "Deal" : "No Deal";
 
     try {
       await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(formData) });
-      alert("Obrigadu! Dadus haruka ona.");
+      alert("Obrigadu! Dadus haruka ona."); 
       this.reset();
       $('.select2').val('').trigger('change');
       validateForm();
     } catch (e) { alert("Error haruka dadus."); } 
     finally { $('#loader').hide(); }
-  });
+});
 </script>
 </body>
 </html>
