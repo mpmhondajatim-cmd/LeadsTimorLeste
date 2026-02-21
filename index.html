@@ -64,8 +64,17 @@
     </div>
 
     <div class="mb-3">
+      <label class="form-label">Status <span class="asterisk">*</span></label>
+      <select name="statusDeal" id="statusDeal" class="form-select" required onchange="toggleEstimasi(); validateForm()">
+        <option value="">Hili...</option>
+        <option value="Prospect">Prospect</option>
+        <option value="Deal">Deal</option>
+      </select>
+    </div>
+
+    <div id="estimasiContainer" class="mb-3" style="display: none;">
       <label class="form-label">Estimasaun Sosa <span class="asterisk">*</span></label>
-      <select name="estimasi" id="estimasi" class="form-select" required onchange="validateForm()">
+      <select name="estimasi" id="estimasi" class="form-select" onchange="validateForm()">
         <option value="">Hili...</option>
         <option value="1-2 Minggu">Semana 1-2</option>
         <option value="3-4 Minggu">Semana 3-4</option>
@@ -92,13 +101,6 @@
       </select>
     </div>
 
-    <div class="form-check mb-3">
-      <input class="form-check-input" type="checkbox" name="isDeal" id="isDeal">
-      <label class="form-check-label fw-bold" for="isDeal">
-        Deal
-      </label>
-    </div>
-    
     <div class="privacy-box mb-3">
       <strong>Polítika Privasidade:</strong><br>
       Ho hanehan formuláriu ne'e, Ita fó kbiit ba ami-nia ekipa atu kontaktu Ita liuhosi WhatsApp ka telefone kona-ba informasaun produtu no promozaun. Ami kompromete atu proteje Ita-nia dadus pesoál ho seguru.
@@ -131,6 +133,21 @@
     input.value = input.value.replace(/\D/g, '');
   }
 
+  function toggleEstimasi() {
+    const status = $('#statusDeal').val();
+    const container = document.getElementById('estimasiContainer');
+    const estimasiInput = document.getElementById('estimasi');
+
+    if (status === 'Prospect') {
+      container.style.display = 'block';
+      estimasiInput.setAttribute('required', 'required');
+    } else {
+      container.style.display = 'none';
+      estimasiInput.removeAttribute('required');
+      $('#estimasi').val(''); 
+    }
+  }
+
   async function loadOptions(action, elementId, params = {}) {
     const query = new URLSearchParams({ action, ...params }).toString();
     try {
@@ -155,8 +172,11 @@
   }
 
   function validateForm() {
-    // Tambahkan namaSales ke dalam pengecekan validasi
-    const fields = ['nama', 'wa', 'municipio', 'posto', 'motor', 'estimasi', 'dealer', 'namaSales', 'event'];
+    const status = $('#statusDeal').val();
+    let fields = ['nama', 'wa', 'municipio', 'posto', 'motor', 'statusDeal', 'dealer', 'namaSales', 'event'];
+    
+    if (status === 'Prospect') fields.push('estimasi');
+
     const allFilled = fields.every(id => {
       const val = $(`#${id}`).val();
       return val && val.trim() !== "";
@@ -168,20 +188,20 @@
   $('#leadForm').on('submit', async function(e) {
     e.preventDefault();
     $('#loader').css('display', 'flex');
-    
     const formData = Object.fromEntries(new FormData(this));
-    // Logika tambahan untuk menangkap status checkbox Deal (TRUE/FALSE)
-    formData.isDeal = $('#isDeal').is(':checked') ? "Deal" : "No Deal";
+
+    if (formData.statusDeal === 'Deal') formData.estimasi = "";
 
     try {
       await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(formData) });
-      alert("Obrigadu! Dadus haruka ona."); 
+      alert("Obrigadu! Dadus haruka ona.");
       this.reset();
+      toggleEstimasi();
       $('.select2').val('').trigger('change');
       validateForm();
     } catch (e) { alert("Error haruka dadus."); } 
     finally { $('#loader').hide(); }
-});
+  });
 </script>
 </body>
 </html>
